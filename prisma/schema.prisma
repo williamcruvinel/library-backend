@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  COMMON
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  name       String
+  email      String   @unique
+  hashedPassword String
+  phone      String
+  document   String   @unique
+  role       Role?    @default(COMMON)
+  reservations Reservation[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Book {
+  id        Int      @id @default(autoincrement())
+  title     String
+  authorId  Int
+  author    Author   @relation(fields: [authorId], references: [id])
+  categories String[] 
+  copies    Copy[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum StatusCopy {
+  AVAILABLE
+  RESERVED
+}
+
+model Copy {
+  id        Int      @id @default(autoincrement())
+  bookId    Int
+  book      Book     @relation(fields: [bookId], references: [id])
+  status    StatusCopy? @default(AVAILABLE)
+  reservationId Int?
+  reservation Reservation? @relation(fields: [reservationId], references: [id])
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @updatedAt
+}
+
+enum StatusReservation {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+}
+
+model Reservation {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
+  copies     Copy[]
+  reservedAt DateTime @default(now())
+  dueDate    DateTime
+  devolutionAt DateTime?
+  status     StatusReservation? @default(ACTIVE)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Author {
+  id        Int    @id @default(autoincrement())
+  name      String
+  books     Book[]
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
