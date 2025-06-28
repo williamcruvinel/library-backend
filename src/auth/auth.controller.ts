@@ -26,12 +26,12 @@ export class AuthController {
   ) {
     const { token, user } = await this.authService.authenticate(signInDto);
 
-    // Define cookie
+    // add token ao cookies http only
     res.cookie('token', token, {
       httpOnly: true, // evita acesso
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 1000 * 60 * 60 * 24, // 1 dia
+      maxAge: 1000 * 60 * 60 * 24, // expira em 1 dia
     });
 
     return user;
