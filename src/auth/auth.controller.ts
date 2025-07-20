@@ -31,7 +31,7 @@ export class AuthController {
       httpOnly: true, // evita acesso
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 1000 * 60 * 60 * 24, // expira em 1 dia
+      maxAge: 7000 * 60 * 60 * 24, // expira em 7 dia
     });
 
     return user;
