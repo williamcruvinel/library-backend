@@ -48,19 +48,29 @@ export class UsersService {
     }
   }
 
-  async findAll(tokenPayload: PayloadTokenDto) {
+  async findAll(tokenPayload: PayloadTokenDto, page = 1, limit = 9) {
     if (tokenPayload.role !== 'ADMIN') {
       throw new HttpException('Acesso negado!', HttpStatus.UNAUTHORIZED);
     }
 
     try {
-      const usersList = await this.prisma.user.findMany({
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
-      });
+      const skip = (page - 1) * limit;
+
+      const [usersList, totalCount] = await Promise.all([
+        this.prisma.user.findMany({
+          skip,
+          take: limit,
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+          orderBy: {
+            id: 'asc',
+          },
+        }),
+        this.prisma.user.count(),
+      ]);
 
       if (usersList.length <= 0) {
         throw new HttpException(
@@ -69,7 +79,12 @@ export class UsersService {
         );
       }
 
-      return usersList;
+      return {
+        data: usersList,
+        total: totalCount,
+        page,
+        totalPages: Math.ceil(totalCount / limit),
+      };
     } catch (error) {
       throw new HttpException(
         'Falha ao buscar Usuários!',

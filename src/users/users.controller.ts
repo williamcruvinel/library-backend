@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -26,8 +27,12 @@ export class UsersController {
 
   @Get()
   @UseGuards(AuthTokenGuard)
-  findAllUsers(@TokenPayloadParam() tokenPayload: PayloadTokenDto) {
-    return this.usersService.findAll(tokenPayload);
+  findAllUsers(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @TokenPayloadParam() tokenPayload: PayloadTokenDto,
+  ) {
+    return this.usersService.findAll(tokenPayload, Number(page), Number(limit));
   }
 
   @Get(':id')
